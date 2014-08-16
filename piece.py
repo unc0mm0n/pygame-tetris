@@ -45,23 +45,16 @@ class Piece(object):
 		'''static method returning a set of Block objects representing a piece of given size.'''
 		piece = set()
 
-		loc = tuple((0, 0))
+		loc = Vector((0, 0))
 		piece.add(Block(loc, color))
-		dirs = [UP, DOWN, RIGHT, LEFT]
+		dirs = [DOWN, RIGHT]
 		while len(piece) < size:
-			if random() > 2:
-				#Generate from a random position
-				block = choice(tuple(piece))
-				direction = choice(dirs)
-				loc = block.pos + direction
-				piece.add(Block(loc, color))
 
-			else:
-				#Generate from the last position
-				block = Block(loc, color)
-				direction = choice(dirs)
-				loc = block.pos + direction
-				piece.add(block)
+			#Generate from the last position
+			block = choice(tuple(piece))
+			direction = choice(dirs)
+			loc = block.pos + direction
+			piece.add(Block(loc, color))
 		return piece
 
 	def __init__(self, piece):
@@ -96,8 +89,6 @@ class Piece(object):
 			return True
 		for _ in range(4):
 			self.rotate_cw()
-			#print(self, "=======", other)
-			#print(self.blocks - other.blocks, '\nROTATING\n\n')
 			if self.blocks == other.blocks:
 				return True
 		return False
@@ -134,14 +125,13 @@ class Piece(object):
 		'''Center piece around (0, 0,...,0).'''
 		center = Vector(0 for n in range(self.dimensions))
 
-		edges = [self.edges(n) for n in range(self.dimensions)]
-		vec = Vector(-sum(edge)//2 for edge in edges)
+		sums = [0 for i in range(self.dimensions)]
+		for block in self.blocks:
+			for i, n in enumerate(block.pos):
+				sums[i] += n
+		vec = Vector(round(-sum/len(self)) for sum in sums)
 
-		while vec != center:
-			vec = Vector(-sum(edge)//2 for edge in edges)
-			self.move(vec)
-			edges = [self.edges(n) for n in range(self.dimensions)]
-		#print(vec)
+		self.move(vec)
 
 	def copy(self):
 		return eval(repr(self))
@@ -172,19 +162,9 @@ class Piece(object):
 
 def main():
 
-	a=Piece({Block(Vector((0, 1)), 'b'), Block(Vector((1, 0)), 'b'), Block(Vector((-1, 0)), 'b'), Block(Vector((0, 0)), 'b')})
+	a=Piece({Block(Vector((0, 1)), 'b'), Block(Vector((0, -1)), 'b'), Block(Vector((0, 0)), 'b'), Block(Vector((-1, -1)), 'b')})
 
-	b=Piece({Block(Vector((1, 1)), 'b'), Block(Vector((1, -1)), 'b'), Block(Vector((1, 0)), 'b'), Block(Vector((0, 0)), 'b')})
-
-	#a.pprint()
-	#a._Piece__normalize()
-	#b._Piece__normalize()
-	print(b)
-	#print(b)
-	#b.pprint()
-	#a.rotate_cw()
-	#a.pprint()
-	print(a==b)
+	#b=Piece({Block(Vector((0, 1)), 'b'), Block(Vector((0, 0)), 'b'), Block(Vector((-1, 0)), 'b'), Block(Vector((-1, -1)), 'b')})
 
 	test_pieces(10000)
 
