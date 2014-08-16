@@ -5,7 +5,7 @@ from utils import Vector
 import time
 
 DEFAULT_WIDTH = 10
-DEFAULT_HEIGHT = 22
+DEFAULT_HEIGHT = 21
 DEFAULT_SIZE = 4
 
 STARTING_SPEED = 5
@@ -24,8 +24,8 @@ class Tetris(object):
 	'''Manage the tetris game, call update to move the game a step forward.'''
 
 	def __init__(self, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, piece_size = DEFAULT_SIZE):
-		self.width = width
-		self.height = height
+		self.width = width - 1
+		self.height = height - 1
 		self.piece_size = piece_size
 		self.reset()
 
@@ -35,6 +35,7 @@ class Tetris(object):
 		return piece
 
 	def reset(self):
+		self.playing = True
 		self.board = []
 		self.current_piece = None
 		self.lines_cleared = 0
@@ -57,30 +58,38 @@ class Tetris(object):
 	def update(self):
 		if self.current_piece is None:
 			self.current_piece = self.new_piece(self.piece_size)
+			if not self.current_can_down():
+				self.playing = False
 
 		if self.current_can_down():
 			self.current_piece.move(DOWN)
 		else:
+			for block in self.current_piece:
+				self.board.append(block)
 			self.current_piece = None
 
 		#TODO: Check Scoring
 
 	def pprint(self):
 		occupied = {}
-		for block in self.current_piece:
-			occupied[block.pos] = 'c'
-		for idx, block in enumerate(self.board):
-			occupied[block.pos] = idx
+		print('--'*self.width)
+		if self.current_piece:
+			for block in self.current_piece:
+				occupied[block.pos] = 'c'
 
-		for y in range(self.height):
-			for x in range(self.width):
+		for block in self.board:
+			occupied[block.pos] = 'O'
+
+		for y in range(self.height + 1):
+			for x in range(self.width + 1):
 				print(occupied.get((x, y), '.'),end = ' ')
 			print()
+		print('--'*self.width, '\n')
 
 if __name__ == '__main__':
-	t = Tetris()
+	t = Tetris(piece_size = 4)
 
-	while True:
+	while t.playing:
 		t.update()
 		t.pprint()
-		time.sleep(1)
+		time.sleep(0.1)
