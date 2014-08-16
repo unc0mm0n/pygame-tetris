@@ -51,7 +51,7 @@ class Piece(object):
 
 	def __init__(self, piece):
 		'''Create a piece using a given set of blocks.'''
-		self.piece = piece
+		self.blocks = piece
 
 	@classmethod
 	def Random(cls, size, color):
@@ -59,20 +59,23 @@ class Piece(object):
 		return cls(Piece.__generate_piece(size, color))
 
 	def __repr__(self):
-		return 'Piece({})'.format(self.piece)
+		return 'Piece({})'.format(self.blocks)
 
 	def __len__(self):
-		return len(self.piece)
+		return len(self.blocks)
 
 	def __str__(self):
 		str = 'Piece:\n'
-		for block in self.piece:
+		for block in self.blocks:
 			str += '{0}\n'.format(block)
 		return str
 
+	def __iter__(self):
+		return iter(self.blocks)
+
 	def move(self, direction):
 		'''Move all blocks buidling the piece in the given direction.'''
-		for block in self.piece:
+		for block in self.blocks:
 			block.move(direction)
 
 if __name__ == '__main__':
