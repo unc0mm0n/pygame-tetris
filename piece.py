@@ -9,7 +9,7 @@ RIGHT = Vector((1, 0))
 
 class Block(object):
 	''' A representation of a block. Holds xy coordinates and color
-		Supports move operation with Vector2
+		Supports move operation with Vector
 	'''
 
 	def __init__(self, pos, color):
@@ -28,6 +28,9 @@ class Block(object):
 	def __str__(self):
 		return "Block: {}, {}".format(str(self.pos), str(self.color))
 
+	def __len__(self):
+		return len(self.pos)
+
 	def move(self, direction):
 		self.pos += direction
 
@@ -36,15 +39,15 @@ class Block(object):
 		return self.pos == other.pos
 
 class Piece(object):
-	''' A representation of a piece Built from blocks.'''
+	''' A representation of a piece built from blocks.'''
 
 	def __generate_piece(size, color):
 		'''static method returning a set of Block objects representing a piece of given size.'''
 		piece = set()
-		
-		loc = (0, 0)
+
+		loc = tuple((0, 0))
 		piece.add(Block(loc, color))
-		dirs = [DOWN, RIGHT]
+		dirs = [UP, DOWN, RIGHT, LEFT]
 		while len(piece) < size:
 			block = sample(piece, 1)[0]
 			direction = choice(dirs)
@@ -56,10 +59,13 @@ class Piece(object):
 	def __init__(self, piece):
 		'''Create a piece using a given set of blocks.'''
 		self.blocks = piece
+		self.dimensions = len(next(iter(piece)))
+
+		self.center = self.__normalize()
 
 	@classmethod
 	def Random(cls, size, color):
-		'''Create a piece using a random set of blocks, forming a legal piece'''
+		'''Create a piece using a random set of blocks, forming a legal, 2 dimensional piece'''
 		return cls(Piece.__generate_piece(size, color))
 
 	def __repr__(self):
@@ -82,15 +88,41 @@ class Piece(object):
 		for block in self.blocks:
 			block.move(direction)
 
+	def edges(self, dimension):
+		'''Returns the two farthest points in given dimension. '''
+		blocks = iter(self.blocks)
+		lowest = next(blocks).pos[dimension]
+		highest = lowest
+
+		for block in blocks:
+			height = block.pos[dimension]
+			if height < lowest:
+				lowest = height
+			if height > highest:
+				highest = height
+
+		return (lowest, highest)
+
+	def __normalize(self):
+		'''Center piece around (0, 0).'''
+		edges = [self.edges(n) for n in range(self.dimensions)]
+		print(self)
+		print(edges, "=======")
+		vec = Vector(-(sum(edge)//2) for edge in edges)
+		print(vec)
+		self.move(vec)
+		return 'a'
+
 	def copy(self):
 		return eval(repr(self))
 
 if __name__ == '__main__':
-	a = Piece.Random(4, 'b')
-	b = eval(repr(a))
-	print(b)
-	b.move(DOWN)
-	for _ in range(5):
-		b.move(DOWN)
-		b.move(RIGHT)
-		print(b)
+	piece = [
+		Block(Vector((-2, 0)), 'a'),
+		Block(Vector((-2, -1)), 'a'),
+		Block(Vector((-1, 0)), 'a'),
+		Block(Vector((0, 0)), 'a'),
+	]
+
+	a = Piece.Random(4, 'a')
+	print(a)
