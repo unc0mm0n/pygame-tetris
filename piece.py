@@ -32,7 +32,7 @@ class Block(object):
 		return len(self.pos)
 
 	def move(self, direction):
-		self.pos += direction
+		return Block(self.pos + direction, self.color)
 
 	def corguent(self, other):
 		'''Return true if both blocks are in the same position.'''
@@ -49,16 +49,24 @@ class Piece(object):
 		piece.add(Block(loc, color))
 		dirs = [UP, DOWN, RIGHT, LEFT]
 		while len(piece) < size:
-			block = choice(tuple(pieces))
-			direction = choice(dirs)
-			loc = block.pos + direction
+			if random() > 2:
+				#Generate from a random position
+				block = choice(tuple(piece))
+				direction = choice(dirs)
+				loc = block.pos + direction
+				piece.add(Block(loc, color))
 
-			piece.add(Block(loc, color))
+			else:
+				#Generate from the last position
+				block = Block(loc, color)
+				direction = choice(dirs)
+				loc = block.pos + direction
+				piece.add(block)
 		return piece
 
 	def __init__(self, piece):
 		'''Create a piece using a given set of blocks.'''
-		self.blocks = piece
+		self.blocks = set(piece)
 		self.dimensions = len(next(iter(piece)))
 
 		self.center = self.__normalize()
@@ -83,10 +91,29 @@ class Piece(object):
 	def __iter__(self):
 		return iter(self.blocks)
 
+	def __eq__(self, other):
+		if self.blocks == other.blocks:
+			return True
+		for _ in range(4):
+			self.rotate_cw()
+			#print(self, "=======", other)
+			#print(self.blocks - other.blocks, '\nROTATING\n\n')
+			if self.blocks == other.blocks:
+				return True
+		return False
+
+	def __hash__(self):
+		total = 0
+		for block in self.blocks:
+			total += hash(block)
+		return total
+
 	def move(self, direction):
 		'''Move all blocks buidling the piece in the given direction.'''
+		new_blocks = set()
 		for block in self.blocks:
-			block.move(direction)
+			new_blocks.add(block.move(direction))
+		self.blocks = new_blocks
 
 	def edges(self, dimension):
 		'''Returns the two farthest points in given dimension. '''
@@ -104,25 +131,87 @@ class Piece(object):
 		return (lowest, highest)
 
 	def __normalize(self):
-		'''Center piece around (0, 0).'''
+		'''Center piece around (0, 0,...,0).'''
+		center = Vector(0 for n in range(self.dimensions))
+
 		edges = [self.edges(n) for n in range(self.dimensions)]
-		print(self)
-		print(edges, "=======")
-		vec = Vector(-(sum(edge)//2) for edge in edges)
-		print(vec)
-		self.move(vec)
-		return 'a'
+		vec = Vector(-sum(edge)//2 for edge in edges)
+
+		while vec != center:
+			vec = Vector(-sum(edge)//2 for edge in edges)
+			self.move(vec)
+			edges = [self.edges(n) for n in range(self.dimensions)]
+		#print(vec)
 
 	def copy(self):
 		return eval(repr(self))
 
-if __name__ == '__main__':
-	piece = [
-		Block(Vector((-2, 0)), 'a'),
-		Block(Vector((-2, -1)), 'a'),
-		Block(Vector((-1, 0)), 'a'),
-		Block(Vector((0, 0)), 'a'),
-	]
+	def rotate_cw(self):
+		new_blocks = set()
+		for block in self.blocks:
+			x, y = block.pos
+			new_blocks.add(Block(Vector((-y, x)), block.color))
+		self.blocks = new_blocks
 
-	a = Piece.Random(4, 'a')
-	print(a)
+	def pprint(self):
+		self.move(Vector((4, 4)))
+
+		occupied = {}
+		for block in self.blocks:
+			occupied[block.pos] = '*'
+
+		for y in range(8):
+			for x in range(8):
+				if (x, y) in occupied:
+					print('*', end = "")
+				else:
+					print(' ', end = "")
+			print()
+
+		self.move(Vector((-4, -4)))
+
+def main():
+
+	a=Piece({Block(Vector((0, 1)), 'b'), Block(Vector((1, 0)), 'b'), Block(Vector((-1, 0)), 'b'), Block(Vector((0, 0)), 'b')})
+
+	b=Piece({Block(Vector((1, 1)), 'b'), Block(Vector((1, -1)), 'b'), Block(Vector((1, 0)), 'b'), Block(Vector((0, 0)), 'b')})
+
+	#a.pprint()
+	#a._Piece__normalize()
+	#b._Piece__normalize()
+	print(b)
+	#print(b)
+	#b.pprint()
+	#a.rotate_cw()
+	#a.pprint()
+	print(a==b)
+
+	test_pieces(10000)
+
+
+def test_pieces(sample_size = 1000):
+	pieces = {}
+	for _ in range(sample_size):
+		piece = Piece.Random(4, 'b')
+		found = False
+		for _ in range(4):
+			if piece in pieces:
+				pieces[piece] += 1
+				found = True
+				break
+			piece.rotate_cw()
+		if not found:
+			pieces[piece] = 1
+
+	for key in pieces:
+		key.pprint()
+	#	print(key)
+		print("{} times".format(pieces[key]))
+		print('\n', repr(key))
+		print("=====")
+	print(len(pieces), "total pieces")
+
+
+if __name__ == '__main__':
+	main()
+	
