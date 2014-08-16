@@ -44,7 +44,10 @@ class Tetris(object):
 		if self.current_piece is None:
 			self.current_piece = self.new_piece(self.piece_size)
 
+		#TODO: if can_move_down ###
 		self.current_piece.move(DOWN)
+
+		#TODO: Check Scoring
 
 	def pprint(self):
 		occupied = {}
