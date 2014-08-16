@@ -106,21 +106,6 @@ class Piece(object):
 			new_blocks.add(block.move(direction))
 		self.blocks = new_blocks
 
-	def edges(self, dimension):
-		'''Returns the two farthest points in given dimension. '''
-		blocks = iter(self.blocks)
-		lowest = next(blocks).pos[dimension]
-		highest = lowest
-
-		for block in blocks:
-			height = block.pos[dimension]
-			if height < lowest:
-				lowest = height
-			if height > highest:
-				highest = height
-
-		return (lowest, highest)
-
 	def __normalize(self):
 		'''Center piece around (0, 0,...,0).'''
 		center = Vector(0 for n in range(self.dimensions))
