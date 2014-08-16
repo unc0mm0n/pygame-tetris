@@ -49,7 +49,7 @@ class Piece(object):
 		piece.add(Block(loc, color))
 		dirs = [UP, DOWN, RIGHT, LEFT]
 		while len(piece) < size:
-			block = sample(piece, 1)[0]
+			block = choice(tuple(pieces))
 			direction = choice(dirs)
 			loc = block.pos + direction
 
