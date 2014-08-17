@@ -40,12 +40,28 @@ class Tetris(object):
 		self.lines_cleared = 0
 		self.speed = STARTING_SPEED
 
+	def current_can_down(self):
+		next_location = self.current_piece.copy()
+		next_location.move(DOWN)
+
+		for block in next_location:
+			if block.pos[1] > self.height:
+				return False
+
+			for location in self.board:
+				if block.corguent(location):
+					return False
+
+		return True
+
 	def update(self):
 		if self.current_piece is None:
 			self.current_piece = self.new_piece(self.piece_size)
 
-		#TODO: if can_move_down ###
-		self.current_piece.move(DOWN)
+		if self.current_can_down():
+			self.current_piece.move(DOWN)
+		else:
+			self.current_piece = None
 
 		#TODO: Check Scoring
 
@@ -64,7 +80,7 @@ class Tetris(object):
 if __name__ == '__main__':
 	t = Tetris()
 
-	for _ in range(11):
+	while True:
 		t.update()
 		t.pprint()
-		time.sleep(2)
+		time.sleep(1)

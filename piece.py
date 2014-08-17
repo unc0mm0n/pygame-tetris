@@ -82,7 +82,7 @@ class Piece(object):
 		for block in self.blocks:
 			block.move(direction)
 
-	def __deepcopy__(self):
+	def copy(self):
 		return eval(repr(self))
 
 if __name__ == '__main__':
