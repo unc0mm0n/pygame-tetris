@@ -82,6 +82,9 @@ class Piece(object):
 		for block in self.blocks:
 			block.move(direction)
 
+	def __deepcopy__(self):
+		return eval(repr(self))
+
 if __name__ == '__main__':
 	a = Piece.Random(4, 'b')
 	b = eval(repr(a))
