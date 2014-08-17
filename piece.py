@@ -31,6 +31,10 @@ class Block(object):
 	def move(self, direction):
 		self.pos += direction
 
+	def corguent(self, other):
+		'''Return true if both blocks are in the same position.'''
+		return self.pos == other.pos
+
 class Piece(object):
 	''' A representation of a piece Built from blocks.'''
 
